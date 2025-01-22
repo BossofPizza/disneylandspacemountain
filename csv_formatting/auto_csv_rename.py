@@ -14,7 +14,7 @@ ride_name_mapping = {
     'piratesofthecaribbean': 'Pirates of the Caribbean',
     'indianajones': 'Indiana Jones Adventure',
     'splashmountain': 'Splash Mountain',
-    'starwars': 'Star Wars: Rise of the Resistance',
+    'starwarsriseoftheresistance': 'Star Wars Rise of the Resistance',
     'matterhorn': 'Matterhorn Bobsleds',
     'autopia': 'Autopia',
     'dumbotheflyingelephant': 'Dumbo the Flying Elephant',
@@ -23,12 +23,12 @@ ride_name_mapping = {
     'monorail': 'Disneyland Monorail',
     'marktwain': 'Mark Twain Riverboat',
     'mainstreetvehicles': 'Main Street Vehicles',
-    'storybooklandcanalboats': 'Storybook Land Canal Boats',
+    'storybooklandcanalboats': 'Storybookland Canal Boats',
     'snowwhite': 'Snow White\'s Enchanted Wish',
     'caseyjrcircustrain': 'Casey Jr. Circus Train',
     'chipndalesgadgetcoaster': 'Chip \'n\' Dale\'s gadgetcoaster',
     'aliceinwonderland': 'Alice in Wonderland',
-    'winniepooh': 'The Many Adventures of Winnie the Pooh',
+    'themanyadventuresofwinniethepooh': 'The Many Adventures of Winnie the Pooh',
     'rogerabbit': 'Roger Rabbit\'s Car Toon Spin',
     'tarzanstreehouse': 'Tarzan\'s Treehouse',
     'davycrockett': 'Davy Crockett\'s Explorer Canoes',
@@ -46,7 +46,8 @@ ride_name_mapping = {
     'madteaparty': 'Mad Tea Party',
     'kingarthurcarrousel': 'King Arthur Carrousel',
     'mrtoadswildride': 'Mr Toads Wild Ride',
-    'millenniumfalconsmugglersrun': "Millennium Falcon Smugglers Run"
+    'millenniumfalconsmugglersrun': "Millennium Falcon Smugglers Run",
+    'pinocchiosdaringjourney': "Pinocchios Daring Journey"
 }
 
 # Month names fully spelled out

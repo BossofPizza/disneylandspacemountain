@@ -15,7 +15,6 @@ class Ride:
         self.pushover_user_key = pushover_user_key
         self.pushover_api_token = pushover_api_token
         self.previous_category = None
-        self.previous_actual_wait_time = None  # Track the last actual wait time
         self.time_shift = -3  # Change this line for time adjustment: positive for future, negative for past
 
     def calculate_average_wait_time(self, timezone='US/Pacific'):
@@ -97,7 +96,6 @@ class Ride:
             return "average"  # If the difference is between -10 and +10, it's average
         else:
             return "bad"  # If the difference is less than -10, it's bad
-
     def send_notification(self, message):
         try:
             response = httpx.post(
@@ -137,19 +135,14 @@ class Ride:
 
             self.send_notification(message)
             self.previous_category = current_category
-
-        # Check if the wait time has decreased
-        if self.previous_actual_wait_time is not None and actual_wait_time < self.previous_actual_wait_time:
-            decrease_message = f"Wait time has decreased! 🎉 (Previous: {self.previous_actual_wait_time} mins, Now: {actual_wait_time} mins)"
-            self.send_notification(decrease_message)
-
-        # Update the previous actual wait time
-        self.previous_actual_wait_time = actual_wait_time
+        else:
+            print(f"No change in category for {self.name}. No notification sent.")
 
     def start_checking(self):
         while True:
             self.check_wait_time()
             time.sleep(60)
+
 
 
 # Ride instances
@@ -845,6 +838,4 @@ tianas_bayou_adventure_thread.start()
 # Keep the main program running
 while True:
     time.sleep(10)
-
-
 
