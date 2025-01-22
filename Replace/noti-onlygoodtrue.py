@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import requests
 from datetime import datetime
+import pytz  # Import the pytz library
 
 # Pushover credentials
 api_token = "amqmtqh5hjne37tk68keg9iwytjwhd"
@@ -12,7 +13,7 @@ user_key = "unb249suwmpir19ng1zguhxqxyyfgd"
 PUSHOVER_USER_KEY = 'unb249suwmpir19ng1zguhxqxyyfgd'
 PUSHOVER_API_TOKEN = 'amqmtqh5hjne37tk68keg9iwytjwhd'
 
-# Define the URL for the Buzz Lightyear Astro Blasters wait times page
+# Define the URL for the Space Mountain wait times page
 url = "https://www.thrill-data.com/waits/park/dlr/disneyland/"
 
 # Function to send a Pushover notification
@@ -32,17 +33,17 @@ def send_pushover_notification(title, message):
 
 # Load all months' CSV files into a dictionary
 months_data = {
-    'January': 'Buzz Lightyear Astro Blasters, January 2024, Disneyland.csv',
-    'February': 'Buzz Lightyear Astro Blasters, February 2024, Disneyland.csv',
-    'March': 'Buzz Lightyear Astro Blasters, March 2024, Disneyland.csv',
-    'April': 'Buzz Lightyear Astro Blasters, April 2024, Disneyland.csv',
-    'June': 'Buzz Lightyear Astro Blasters, June 2024, Disneyland.csv',
-    'July': 'Buzz Lightyear Astro Blasters, July 2024, Disneyland.csv',
-    'August': 'Buzz Lightyear Astro Blasters, August 2024, Disneyland.csv',
-    'September': 'Buzz Lightyear Astro Blasters, September 2024, Disneyland.csv',
-    'October': 'Buzz Lightyear Astro Blasters, October 2024, Disneyland.csv',
-    'November': 'Buzz Lightyear Astro Blasters, November 2024, Disneyland.csv',
-    'December': 'Buzz Lightyear Astro Blasters, December 2024, Disneyland.csv',
+    'January': 'Space Mountain, January 2024, Disneyland.csv',
+    'February': 'Space Mountain, February 2024, Disneyland.csv',
+    'March': 'Space Mountain, March 2024, Disneyland.csv',
+    'April': 'Space Mountain, April 2024, Disneyland.csv',
+    'June': 'Space Mountain, June 2024, Disneyland.csv',
+    'July': 'Space Mountain, July 2024, Disneyland.csv',
+    'August': 'Space Mountain, August 2024, Disneyland.csv',
+    'September': 'Space Mountain, September 2024, Disneyland.csv',
+    'October': 'Space Mountain, October 2024, Disneyland.csv',
+    'November': 'Space Mountain, November 2024, Disneyland.csv',
+    'December': 'Space Mountain, December 2024, Disneyland.csv',
 }
 
 # Load all data into a single DataFrame
@@ -95,10 +96,13 @@ def predict_wait_time(day: str, month: str, hour: int):
 notified_good_time = False
 notified_bad_time = False
 
+# Create a timezone object for Pacific Time
+pacific_tz = pytz.timezone('US/Pacific')
+
 # Infinite loop to run every 30 seconds
 while True:
-    # Get the current day, month, and hour
-    now = datetime.now()
+    # Get the current day, month, and hour in Pacific Time
+    now = datetime.now(pacific_tz)  # Get current time in Pacific Time zone
     current_day = now.strftime('%A')  # Full weekday name (e.g., "Monday")
     current_month = now.strftime('%B')  # Full month name (e.g., "January")
     current_hour = now.hour  # Current hour (0-23)
@@ -119,7 +123,7 @@ while True:
         for ride in ride_name_elements:
             ride_name = ride.get_text(strip=True)
 
-            if ride_name == "Buzz Lightyear Astro Blasters":
+            if ride_name == "Space Mountain":
                 parent_tr = ride.find_parent("tr")
                 td_elements = parent_tr.find_all("td")
 
@@ -146,7 +150,7 @@ while True:
             message += "Good time to go! ✅"
 
             # Send the notification
-            title = f"Buzz Lightyear Astro Blasters: {current_day}"
+            title = f"Space Mountain: {current_day}"
             send_pushover_notification(title, message)
 
             # Update the notification state
@@ -160,7 +164,7 @@ while True:
             message += "No longer a good time to go. ❌"
 
             # Send the notification
-            title = f"Buzz Lightyear Astro Blasters: {current_day}"
+            title = f"Space Mountain: {current_day}"
             send_pushover_notification(title, message)
 
             # Update the notification state

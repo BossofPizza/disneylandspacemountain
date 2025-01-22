@@ -1,11 +1,20 @@
+import time
+import httpx
+from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 import requests
 from datetime import datetime
+import pytz  # Import pytz for time zone handling
 
 # Pushover credentials
+api_token = "amqmtqh5hjne37tk68keg9iwytjwhd"
+user_key = "unb249suwmpir19ng1zguhxqxyyfgd"
 PUSHOVER_USER_KEY = 'unb249suwmpir19ng1zguhxqxyyfgd'
 PUSHOVER_API_TOKEN = 'amqmtqh5hjne37tk68keg9iwytjwhd'
+
+# Define the URL for the Space Mountain wait times page
+url = "https://www.thrill-data.com/waits/park/dlr/disneyland/"
 
 # Function to send a Pushover notification
 def send_pushover_notification(title, message):
@@ -24,17 +33,17 @@ def send_pushover_notification(title, message):
 
 # Load all months' CSV files into a dictionary
 months_data = {
-    'January': 'Indiana Jones Adventure, January 2024, Disneyland.csv',
-    'February': 'Indiana Jones Adventure, February 2024, Disneyland.csv',
-    'March': 'Indiana Jones Adventure, March 2024, Disneyland.csv',
-    'April': 'Indiana Jones Adventure, April 2024, Disneyland.csv',
-    'June': 'Indiana Jones Adventure, June 2024, Disneyland.csv',
-    'July': 'Indiana Jones Adventure, July 2024, Disneyland.csv',
-    'August': 'Indiana Jones Adventure, August 2024, Disneyland.csv',
-    'September': 'Indiana Jones Adventure, September 2024, Disneyland.csv',
-    'October': 'Indiana Jones Adventure, October 2024, Disneyland.csv',
-    'November': 'Indiana Jones Adventure, November 2024, Disneyland.csv',
-    'December': 'Indiana Jones Adventure, December 2024, Disneyland.csv',
+    'January': 'Space Mountain, January 2024, Disneyland.csv',
+    'February': 'Space Mountain, February 2024, Disneyland.csv',
+    'March': 'Space Mountain, March 2024, Disneyland.csv',
+    'April': 'Space Mountain, April 2024, Disneyland.csv',
+    'June': 'Space Mountain, June 2024, Disneyland.csv',
+    'July': 'Space Mountain, July 2024, Disneyland.csv',
+    'August': 'Space Mountain, August 2024, Disneyland.csv',
+    'September': 'Space Mountain, September 2024, Disneyland.csv',
+    'October': 'Space Mountain, October 2024, Disneyland.csv',
+    'November': 'Space Mountain, November 2024, Disneyland.csv',
+    'December': 'Space Mountain, December 2024, Disneyland.csv',
 }
 
 # Load all data into a single DataFrame
@@ -83,8 +92,10 @@ def predict_wait_time(day: str, month: str, hour: int):
     predicted_wait_time = X_input.dot(beta)
     return predicted_wait_time[0]
 
-# Get the current day, month, and hour
-now = datetime.now()
+# Get the current day, month, and hour in Pacific Time (PT)
+pacific_time = pytz.timezone('US/Pacific')
+now = datetime.now(pacific_time)  # Get current time in Pacific Time zone
+
 current_day = now.strftime('%A')  # Full weekday name (e.g., "Monday")
 current_month = now.strftime('%B')  # Full month name (e.g., "January")
 current_hour = now.hour  # Current hour (0-23)
@@ -92,7 +103,50 @@ current_hour = now.hour  # Current hour (0-23)
 # Predict the wait time for the current day, month, and hour
 predicted_time = predict_wait_time(current_day, current_month, current_hour)
 
+# Get the actual wait time from the website
+actual_time = None
+try:
+    # Send a GET request to retrieve the page's content
+    response = httpx.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Find all anchor tags with the title attribute containing the ride name
+    ride_name_elements = soup.find_all("a", title=True)
+
+    for ride in ride_name_elements:
+        ride_name = ride.get_text(strip=True)
+
+        if ride_name == "Space Mountain":
+            parent_tr = ride.find_parent("tr")
+            td_elements = parent_tr.find_all("td")
+
+            if len(td_elements) >= 4:
+                wait_time_td = td_elements[3]
+                actual_time = wait_time_td.find("div")["title"] if wait_time_td.find("div") else None
+            break
+except Exception as e:
+    print(f"Error retrieving actual wait time: {e}")
+
+if actual_time is not None:
+    actual_time = int(actual_time.replace(" Minute Wait", "").strip())
+else:
+    actual_time = 0  # Or some other appropriate value if actual time isn't found
+
+# Calculate the difference between the predicted and actual times
+difference = predicted_time - actual_time
+
+# Prepare the message content
+message = f"Predicted wait time for {current_day} in {current_month} at {current_hour}:00 PT is {predicted_time:.2f} minutes.\n"
+message += f"Actual wait time is {actual_time} minutes.\n"
+
+# Compare the predicted time to the actual time
+if difference > 10:
+    message += "Good time to go! ✅"
+elif -10 <= difference <= 10:
+    message += "Average time to go! 👌"
+else:
+    message += "Bad time to go! ❌"
+
 # Send the notification
-title = f"Wait Time Prediction: {current_day}"
-message = f"Predicted wait time for {current_day} in {current_month} at {current_hour}:00 is {predicted_time:.2f} minutes."
+title = f"Space Mountain: {current_day}"
 send_pushover_notification(title, message)

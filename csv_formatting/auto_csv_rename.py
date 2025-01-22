@@ -4,29 +4,30 @@ import shutil
 # Ride names mapping for proper formatting
 ride_name_mapping = {
     'spacemountain': 'Space Mountain',
+    'astroorbitor': 'Astro Orbitor',
     'buzzlightyearastroblasters': 'Buzz Lightyear Astro Blasters',
     'hauntedmansion': 'Haunted Mansion',
     'hyperspacemountain': 'Hyperspace Mountain',
     'bigthundermountain': 'Big Thunder Mountain',
     'itsasmallworld': 'it\'s a small world',
-    'peterpan': 'Peter Pan\'s Flight',
+    'peterpansflight': 'Peter Pans Flight',
     'piratesofthecaribbean': 'Pirates of the Caribbean',
     'indianajones': 'Indiana Jones Adventure',
     'splashmountain': 'Splash Mountain',
     'starwars': 'Star Wars: Rise of the Resistance',
     'matterhorn': 'Matterhorn Bobsleds',
     'autopia': 'Autopia',
-    'dumbo': 'Dumbo the Flying Elephant',
-    'findingnemo': 'Finding Nemo Submarine Voyage',
+    'dumbotheflyingelephant': 'Dumbo the Flying Elephant',
+    'findingnemosubmarinevoyage': 'Finding Nemo Submarine Voyage',
     'junglecruise': 'Jungle Cruise',
     'monorail': 'Disneyland Monorail',
     'marktwain': 'Mark Twain Riverboat',
     'mainstreetvehicles': 'Main Street Vehicles',
     'storybooklandcanalboats': 'Storybook Land Canal Boats',
     'snowwhite': 'Snow White\'s Enchanted Wish',
-    'casysjr': 'Casey Jr. Circus Train',
-    'chipndalesgadgetcoaster': 'Chip \'n\' Dale\'s GADGETcoaster',
-    'alicesadventure': 'Alice in Wonderland',
+    'caseyjrcircustrain': 'Casey Jr. Circus Train',
+    'chipndalesgadgetcoaster': 'Chip \'n\' Dale\'s gadgetcoaster',
+    'aliceinwonderland': 'Alice in Wonderland',
     'winniepooh': 'The Many Adventures of Winnie the Pooh',
     'rogerabbit': 'Roger Rabbit\'s Car Toon Spin',
     'tarzanstreehouse': 'Tarzan\'s Treehouse',
@@ -34,14 +35,18 @@ ride_name_mapping = {
     'goofysplayhouse': 'Goofy\'s Playhouse',
     'waltdisneyenchantedtikiroom': 'Walt Disney\'s Enchanted Tiki Room',
     'meetdisneyprincesses': 'Meet Disney Princesses at Royal Hall',
-    'mickeysrunawayrailway': 'Mickey & Minnie\'s Runaway Railway',
+    'mickeyminniesrunawayrailway': 'Mickey Minnies Runaway Railway',
     'millenniumfalcon': 'Millennium Falcon: Smugglers Run',
-    'rogerabbit': 'Roger Rabbit\'s Car Toon Spin',
+    'rogerrabbitscartoonspin': 'Roger Rabbit\'s Car Toon Spin',
     'tarzanstreehouse': 'Tarzan\'s Treehouse',
     'disneylandrailroad': 'Disneyland Railroad',
     'disneyvillainsdanceparty': 'Disney Villains Dance Party',
     'disneylandbandcavalcade': 'Disneyland Band Cavalcade',
-    'startourstheadventurescontinue': 'Star Tours'
+    'startourstheadventurescontinue': 'Star Tours',
+    'madteaparty': 'Mad Tea Party',
+    'kingarthurcarrousel': 'King Arthur Carrousel',
+    'mrtoadswildride': 'Mr Toads Wild Ride',
+    'millenniumfalconsmugglersrun': "Millennium Falcon Smugglers Run"
 }
 
 # Month names fully spelled out
@@ -61,7 +66,7 @@ month_names = {
 }
 
 # Specify input and output directories
-input_directory = r'C:\Users\luked\PycharmProjects\disneylandapp\Practicle Use'
+input_directory = r'C:\Users\luked\PycharmProjects\disneylandapp\csv_formatting'
 output_directory = r'C:\Users\luked\PycharmProjects\disneylandapp\Output'
 
 # Get all files in the directory

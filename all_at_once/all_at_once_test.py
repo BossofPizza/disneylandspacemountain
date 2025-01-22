@@ -6,7 +6,7 @@ import numpy as np
 import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
-
+import pytz  # Add the pytz import
 
 class Ride:
     def __init__(self, name, url, data_paths, pushover_user_key, pushover_api_token):
@@ -85,7 +85,6 @@ class Ride:
         try:
             print(f"Fetching actual wait time for {self.name}...")
             response = requests.get(self.url)  # Use requests.get instead
-            # print(f"Response status code: {response.status_code}")  # Commented out to stop printing the status code
             soup = BeautifulSoup(response.text, "html.parser")
             ride_name_elements = soup.find_all("a", title=True)
 
@@ -118,7 +117,18 @@ class Ride:
             self.notified_bad_time = True
 
 
+def get_pacific_time():
+    # Define Pacific Time timezone
+    pacific_tz = pytz.timezone('US/Pacific')
+    # Get current time in Pacific Time zone
+    pacific_time = datetime.now(pacific_tz)
+    return pacific_time
+
+
 def main():
+    pacific_time = get_pacific_time()
+    print(f"Current time in Pacific Time (PT): {pacific_time.strftime('%Y-%m-%d %H:%M:%S')}")
+
     rides = [
         Ride(
             name="Space Mountain",

@@ -1,21 +1,24 @@
 import time
 from datetime import datetime, timedelta
+import pytz
 import httpx
 from bs4 import BeautifulSoup
-import pytz  # For timezone handling
 
-# Pushover credentials
+# Set the timezone to Pacific Time
+pacific_tz = pytz.timezone("America/Los_Angeles")
+
+# Your Pushover API token and user key
 api_token = "amqmtqh5hjne37tk68keg9iwytjwhd"
 user_key = "unb249suwmpir19ng1zguhxqxyyfgd"
 
-# Define the URL
+# The URL to fetch Lightning Lane times from (change this with your actual URL)
 url = "https://www.thrill-data.com/waits/park/dlr/disneyland/"
 
-# List of rides with their notification thresholds in hours
+# Rides you're checking for (update with your list of rides)
 rides_to_check = {
-    "Space Mountain": 1.5,
-    "Indiana Jones Adventure": 1.5,
-    "Big Thunder Mountain Railroad": 1,
+    "Space Mountain": 3.0,
+    "Indiana Jones Adventure": 2.0,
+    "Big Thunder Mountain Railroad": 1.5,
     "Matterhorn Bobsleds": 1.5,
     "Autopia": 1,
     "Buzz Lightyear Astro Blasters": 1,
@@ -27,14 +30,6 @@ rides_to_check = {
     "Star Tours - The Adventures Continue": 1,
     "Tiana's Bayou Adventure": 1.5
 }
-
-# Initialize the previous state of Lightning Lane times to prevent duplicate notifications
-previous_times = {ride: None for ride in rides_to_check}
-notified_in_range = {ride: False for ride in rides_to_check}  # Track notifications for range changes
-
-# Set the timezone to Pacific Time
-pacific_tz = pytz.timezone("America/Los_Angeles")
-
 def get_ride_times():
     """Fetch the Lightning Lane times for the rides."""
     updated_times = {}
@@ -115,44 +110,36 @@ def send_notification(message):
         print(f"Error while sending notification: {e}")
 
 def main_loop():
-    """Main loop to check and notify about Lightning Lane times."""
-    global previous_times, notified_in_range
-
+    """Main loop to check and notify about Lightning Lane times every 5 minutes."""
     while True:
         print("Checking Lightning Lane times...")
         updated_times = get_ride_times()
 
-        # Prepare the notification message only for changes into the range
-        messages = []
+        # Prepare the list of ride times with time differences
+        ride_times_with_minutes = []
+
         for ride, lightning_time in updated_times.items():
-            # Parse the time to minutes from now
             if lightning_time in ["Sold Out", "Closed"]:
                 minutes_from_now = None
             else:
                 minutes_from_now = parse_time_to_minutes(lightning_time)
 
-            # Check if the time has changed
-            if previous_times[ride] != lightning_time:
-                # Determine if the new time is within the specified range
-                threshold_minutes = rides_to_check[ride] * 60
+            # Add the ride and time difference to the list
+            ride_times_with_minutes.append((ride, lightning_time, minutes_from_now))
 
-                if minutes_from_now is not None and minutes_from_now <= threshold_minutes:
-                    if not notified_in_range[ride]:  # Notify only if not already in range
-                        messages.append(f"{ride}: {lightning_time}")
-                        notified_in_range[ride] = True
-                else:
-                    notified_in_range[ride] = False  # Reset if no longer in range
+        # Sort the rides based on time difference (soonest first)
+        ride_times_with_minutes.sort(key=lambda x: x[2] if x[2] is not None else float('inf'))
 
-            # Update the previous time for the ride
-            previous_times[ride] = lightning_time
+        # Build the message
+        messages = [f"{ride}: {time}" for ride, time, _ in ride_times_with_minutes]
+        combined_message = "\n".join(messages)
 
-        # Send the notification if there are messages
-        if messages:
-            combined_message = "\n".join(messages)
+        # Send the notification
+        if combined_message:
             send_notification(combined_message)
 
-        # Wait for 30 seconds
-        time.sleep(10)
+        # Wait for 5 minutes before checking again
+        time.sleep(300)  # 5 minutes = 300 seconds
 
 if __name__ == "__main__":
     main_loop()

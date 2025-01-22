@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import requests
 from datetime import datetime
+import pytz  # Import pytz for time zone handling
 
 # Pushover credentials
 PUSHOVER_USER_KEY = 'unb249suwmpir19ng1zguhxqxyyfgd'
@@ -70,6 +71,8 @@ X_ = np.c_[np.ones(X.shape[0]), X]
 X_transpose = X_.T
 beta = np.linalg.inv(X_transpose.dot(X_)).dot(X_transpose).dot(y)
 
+# Define the Pacific Time zone
+pacific_tz = pytz.timezone('US/Pacific')
 
 # Function to predict wait time for a given day, month, and hour
 def predict_wait_time(day: str, month: str, hour: int):
@@ -84,9 +87,8 @@ def predict_wait_time(day: str, month: str, hour: int):
     predicted_wait_time = X_input.dot(beta)
     return predicted_wait_time[0]
 
-
-# Get the current day, month, and hour
-now = datetime.now()
+# Get the current time in Pacific Time zone
+now = datetime.now(pacific_tz)
 current_day = now.strftime('%A')  # Full weekday name (e.g., "Monday")
 current_month = now.strftime('%B')  # Full month name (e.g., "January")
 current_hour = now.hour  # Current hour (0-23)
@@ -95,6 +97,6 @@ current_hour = now.hour  # Current hour (0-23)
 predicted_time = predict_wait_time(current_day, current_month, current_hour)
 
 # Send the notification
-title = f"Wait Time Prediction: {current_day}"
-message = f"Predicted wait time for {current_day} in {current_month} at {current_hour}:00 is {predicted_time:.2f} minutes."
+title = f"Space Mountain: {current_day}"
+message = f"Space Mountain {current_day} in {current_month} at {current_hour}:00 PT is {predicted_time:.2f} minutes."
 send_pushover_notification(title, message)

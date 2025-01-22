@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import requests
 from datetime import datetime
+import pytz  # Import pytz for time zone handling
 
 # Pushover credentials
 api_token = "amqmtqh5hjne37tk68keg9iwytjwhd"
@@ -14,58 +15,6 @@ PUSHOVER_API_TOKEN = 'amqmtqh5hjne37tk68keg9iwytjwhd'
 
 # Define the URL for the Space Mountain wait times page
 url = "https://www.thrill-data.com/waits/park/dlr/disneyland/"
-
-def send_notification():
-    try:
-        # Send a GET request to retrieve the page's content
-        response = httpx.get(url)
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        # Find all anchor tags with the title attribute containing the ride name
-        ride_name_elements = soup.find_all("a", title=True)
-
-        # Iterate through all found ride names to find Space Mountain
-        for ride in ride_name_elements:
-            ride_name = ride.get_text(strip=True)
-
-            if ride_name == "Space Mountain":
-                parent_tr = ride.find_parent("tr")
-                td_elements = parent_tr.find_all("td")
-
-                if len(td_elements) >= 4:
-                    wait_time_td = td_elements[3]
-                    wait_time = wait_time_td.find("div")["title"] if wait_time_td.find("div") else "Not Available"
-                else:
-                    wait_time = "closed"
-
-                if wait_time == "closed":
-                    message = "Space Mountain is currently closed."
-                else:
-                    message = f"Current Wait Time: {wait_time}"
-
-                # Send the notification using Pushover
-                pushover_response = httpx.post(
-                    "https://api.pushover.net/1/messages.json",
-                    data={
-                        "token": api_token,
-                        "user": user_key,
-                        "title": "Space Mountain Wait Time",
-                        "message": message
-                    }
-                )
-
-                # Log the notification status
-                if pushover_response.status_code == 200:
-                    print(f"Push Notification Sent: {message}")
-                else:
-                    print(f"Failed to send notification: {pushover_response.status_code} - {pushover_response.text}")
-
-                break  # Exit the loop once we find Space Mountain
-
-    except httpx.RequestError as e:
-        print(f"An error occurred while sending the request: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
 
 # Function to send a Pushover notification
 def send_pushover_notification(title, message):
@@ -143,8 +92,10 @@ def predict_wait_time(day: str, month: str, hour: int):
     predicted_wait_time = X_input.dot(beta)
     return predicted_wait_time[0]
 
-# Get the current day, month, and hour
-now = datetime.now()
+# Get the current day, month, and hour in Pacific Time (PT)
+pacific_time = pytz.timezone('US/Pacific')
+now = datetime.now(pacific_time)  # Get current time in Pacific Time zone
+
 current_day = now.strftime('%A')  # Full weekday name (e.g., "Monday")
 current_month = now.strftime('%B')  # Full month name (e.g., "January")
 current_hour = now.hour  # Current hour (0-23)
@@ -185,7 +136,7 @@ else:
 difference = predicted_time - actual_time
 
 # Prepare the message content
-message = f"Predicted wait time for {current_day} in {current_month} at {current_hour}:00 is {predicted_time:.2f} minutes.\n"
+message = f"Predicted wait time for {current_day} in {current_month} at {current_hour}:00 PT is {predicted_time:.2f} minutes.\n"
 message += f"Actual wait time is {actual_time} minutes.\n"
 
 # Compare the predicted time to the actual time

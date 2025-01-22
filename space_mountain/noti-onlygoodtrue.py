@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import requests
 from datetime import datetime
+import pytz  # Import the pytz library
 
 # Pushover credentials
 api_token = "amqmtqh5hjne37tk68keg9iwytjwhd"
@@ -95,10 +96,13 @@ def predict_wait_time(day: str, month: str, hour: int):
 notified_good_time = False
 notified_bad_time = False
 
+# Create a timezone object for Pacific Time
+pacific_tz = pytz.timezone('US/Pacific')
+
 # Infinite loop to run every 30 seconds
 while True:
-    # Get the current day, month, and hour
-    now = datetime.now()
+    # Get the current day, month, and hour in Pacific Time
+    now = datetime.now(pacific_tz)  # Get current time in Pacific Time zone
     current_day = now.strftime('%A')  # Full weekday name (e.g., "Monday")
     current_month = now.strftime('%B')  # Full month name (e.g., "January")
     current_hour = now.hour  # Current hour (0-23)
